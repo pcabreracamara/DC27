@@ -47,7 +47,7 @@ ait_pid = [200, 502]
 
 # parameters reported into the AIT to signalize a broadband application.
 appli_name = ["test1", "test2"] #application name
-appli_root = ["http://10.0.0.1/rooted/", "http://10.0.0.1/rooted/"] #URL base of transport_protocol_descriptor
+appli_root = ["http://10.0.0.1/DC27/", "http://10.0.0.1/DC27/"] #URL base of transport_protocol_descriptor
 appli_path = ["index.html", "index.html"]  #initial_path_bytes of simple application descriptor. So the application path will be "http://my_application_root_path/myHbbTV-app/index.html"
 organisationId = [10, 10]  	 # this is a demo value, dvb.org should assign an unique value
 applicationId = [1001, 1002] # this is a demo value. This number corresponds to a trusted application. 
@@ -173,7 +173,7 @@ sdt = service_description_section(
 					service_descriptor(
 						service_type = 1, # digital television service
 						service_provider_name = "PonchiTECH",
-						service_name = "Hijacked CHaNNel xDD",
+						service_name = "Hijacked CHaNNel DC27",
 					),    
 				],
 			),	
@@ -187,7 +187,7 @@ sdt = service_description_section(
 					service_descriptor(
 						service_type = 1, # digital television service
 						service_provider_name = "PonchiTECH",
-						service_name = "Hijacked CHaNNel 2 :)",
+						service_name = "Hijacked CHaNNel 2 at DC27",
 					),    
 				],
 			),

@@ -1,8 +1,8 @@
 #!/bin/sh
 
 
-export INPUT1="norse.avi"
-export INPUT2="norse.avi"
+export INPUT1="input1.avi"
+export INPUT2="input2.avi"
 
 mkdir output
 mkdir tmp
