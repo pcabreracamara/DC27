@@ -1,0 +1,231 @@
+# Copyright 2014-2017 Ron Economos
+#
+# This file is part of dtv-utils
+#
+# dtv-utils is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# dtv-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with dtv-utils; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+
+dtv-utils
+============
+
+Author: Ron Economos
+Email: <w6rz@comcast.net>
+
+This project is a collection of utilities and scripts
+for digital television projects using bladeRF and GNU Radio
+
+
+dvbt-blade.py
+----------------------------------
+
+This Python script transmit a DVB-T digital television signal using the
+bladeRF and gr-dvbt (https://github.com/BogdanDIA/gr-dvbt). A file
+containing an MPEG-2 Transport Stream must be supplied as input.
+Optionally, an output file can be specified to store the generated
+IQ samples (in gr_complex floating point).
+
+usage: dvbt-blade.py [-h] [-m MODE] [-c CH] [-C TYPE] [-r RATE] [-g D]
+                     [-f FREQ] [--txvga1 gain] [--txvga2 gain] [-o OUT]
+                     input-file
+
+positional arguments:
+  input-file            Input file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m MODE, --mode MODE  # of carriers. Options: t2k, t8k (default).
+  -c CH, --channel CH   channel width in MHz. Options: 5, 6, 7, 8 (default).
+  -C TYPE, --cons TYPE  constellation. qpsk, qam16, qam64 (default).
+  -r RATE, --rate RATE  Viterbi rate. 1/2, 2/3, 3/4, 5/6, 7/8 (default).
+  -g D, --guard D       guard interval. 1/32 (default), 1/16, 1/8, 1/4.
+  -f FREQ, --freq FREQ  center frequency (Hz). Default is 429e6.
+  --txvga1 gain         bladeRF TXVGA1 gain. Default is -6.
+  --txvga2 gain         bladeRF TXVGA2 gain. Default is 9.
+  -o OUT, --output OUT  write to specified file.
+
+
+dvbtrate.c
+----------------------------------
+
+Calculates the precise Transport Stream bit-rate for all DVB-T
+constellations, Viterbi code rates and guard intervals for a
+given channel width.
+
+usage: dvbtrate <channel bandwidth>
+
+For example:
+
+./dvbtrate 6
+
+
+qam-blade.py
+----------------------------------
+
+This Python script transmit a ANSI/SCTE 07 2013 (also known as
+ITU-T J.83 Annex B) 64-QAM digital television signal using the
+bladeRF and gr-qam (https://github.com/argilo/gr-qam). A file
+containing an MPEG-2 Transport Stream (at 26.970352 Mbps) must
+be supplied as input. Optionally, an output file can be specified
+to store the generated IQ samples (in gr_complex floating point).
+
+Internal parameter values that can be changed:
+
+The three parameters I_taps, J_increment and Control_Word can be
+used to control the interleaver from the following table.
+
+Control_Word    I_taps    J_increment
+     0            128          1
+     1            128          1
+     2            128          2
+     3             64          2
+     4            128          3
+     5             32          4
+     6            128          4
+     7             16          8
+     8            128          5
+     9              8          16
+    10            128          6
+    11          Reserved
+    12            128          7
+    13          Reserved
+    14            128          8
+    15          Reserved
+
+The default is Control_Word = 6, I_taps = 128 and J_increment = 4
+which seems to be the most commonly used on CATV systems.
+
+
+dvbs2rate.c
+----------------------------------
+
+Calculates the precise Transport Stream bit-rate for all DVB-S2
+constellations, LDPC code rates and pilots on/off for a given
+symbol rate.
+
+usage: dvbs2rate -sx <symbol rate>
+Options:
+	s = short FECFRAME rates
+	x = DVB-S2X rates
+
+For example:
+
+./dvbs2rate 4500000
+./dvbs2rate -s 4500000
+./dvbs2rate -x 4500000
+./dvbs2rate -sx 4500000
+
+
+dvbt2rate.c
+----------------------------------
+
+Calculates the precise Transport Stream bit-rate for all DVB-T2 parameters.
+
+dvbt2rate <channel bandwidth> <fft size> <guard interval> <number of data symbols> <number of FEC blocks> <code rate> <modulation> <frame size> <extended carrier> <pilot pattern> <L1 modulation>
+Options:
+	channel bandwidth = 0, 5, 6, 7, 8 or 10. The value 0 selects the 1.7 MHz mode.
+	fft size = 1, 2, 4, 8, 16 or 32.
+        guard interval = 0 = 1/32, 1 = 1/16, 2 = 1/8, 3 = 1/4, 4 = 1/128, 5 = 19/128, 6 = 19/256.
+        number of data symbols = number of symbols after the P2 symbol(s).
+        number of FEC blocks.
+        code rate = 1 = 1/2, 2 = 3/5, 3 = 2/3, 4 = 3/4, 5 = 4/5, 6 = 5/6, 7 = 1/3, 8 = 2/5.
+        modulation = 1 = QPSK, 2 = 16QAM, 3 = 64QAM, 4 = 256QAM.
+        frame size = 0 = normal, 1 = short
+        extended carrier = 0 normal, 1 = extended
+        pilot pattern = 1, 2, 3, 4, 5, 6, 7, 8.
+        L1 modulaton = 0 = BPSK, 1 = QPSK, 2 = 16QAM, 3 = 64QAM.
+
+For example (BBC 40.2 Mbps parameters):
+
+./dvbt2rate 8 32 4 59 202 3 4 0 1 7 3
+
+There are also three compile time defines to control less often used parameters.
+
+#undef NORMAL_MODE
+#undef PAPR
+#undef MISO
+
+Change these to #define if one or more of these modes are in use.
+
+Note that a valid configuration must fulfill two rules.
+
+1) The frame time TF must be less than 250 milliseconds.
+
+2) The number of dummy cells must be positive.
+
+
+papr.c
+----------------------------------
+
+Calculates the PAPR (Peak to Average Power) of an IQ sample file (32-bit floating
+point pairs). The peak PAPR, percentage of power above each dB level and the
+value and position in the file of the peak IQ samples are printed.
+
+usage: papr <infile>
+
+For Example:
+
+./papr atsc.cfile
+
+
+DVB-T Test bitstreams (all have the same content, 1920x1080@29.97 fps video and 448 kbps AC3 audio):
+
+16QAM
+8 MHz
+
+http://www.w6rz.net/adv8dvbt12.ts /* 1/2 Viterbi rate 12.064171 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt23.ts /* 2/3 Viterbi rate 16.085561 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt34.ts /* 3/4 Viterbi rate 18.096256 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt56.ts /* 5/6 Viterbi rate 20.106951 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt78.ts /* 7/8 Viterbi rate 21.112299 Mbps TS rate */
+
+7 MHz
+
+http://www.w6rz.net/adv7dvbt23.ts /* 2/3 Viterbi rate 14.074866 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt34.ts /* 3/4 Viterbi rate 15.834224 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt56.ts /* 5/6 Viterbi rate 17.593582 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt78.ts /* 7/8 Viterbi rate 18.473262 Mbps TS rate */
+
+6 MHz
+
+http://www.w6rz.net/adv6dvbt23.ts /* 2/3 Viterbi rate 12.064171 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt34.ts /* 3/4 Viterbi rate 13.572192 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt56.ts /* 5/6 Viterbi rate 15.080213 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt78.ts /* 7/8 Viterbi rate 15.834224 Mbps TS rate */
+
+64QAM
+8 MHz
+
+http://www.w6rz.net/adv8dvbt12qam64.ts /* 1/2 Viterbi rate 18.096256 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt23qam64.ts /* 2/3 Viterbi rate 24.128342 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt34qam64.ts /* 3/4 Viterbi rate 27.144385 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt56qam64.ts /* 5/6 Viterbi rate 30.160427 Mbps TS rate */
+http://www.w6rz.net/adv8dvbt78qam64.ts /* 7/8 Viterbi rate 31.668449 Mbps TS rate */
+
+7 MHz
+
+http://www.w6rz.net/adv7dvbt12qam64.ts /* 1/2 Viterbi rate 15.834224 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt23qam64.ts /* 2/3 Viterbi rate 21.112299 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt34qam64.ts /* 3/4 Viterbi rate 23.751336 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt56qam64.ts /* 5/6 Viterbi rate 26.390374 Mbps TS rate */
+http://www.w6rz.net/adv7dvbt78qam64.ts /* 7/8 Viterbi rate 27.709893 Mbps TS rate */
+
+6 MHz
+
+http://www.w6rz.net/adv6dvbt12qam64.ts /* 1/2 Viterbi rate 13.572192 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt23qam64.ts /* 2/3 Viterbi rate 18.096256 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt34qam64.ts /* 3/4 Viterbi rate 20.358288 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt56qam64.ts /* 5/6 Viterbi rate 22.620320 Mbps TS rate */
+http://www.w6rz.net/adv6dvbt78qam64.ts /* 7/8 Viterbi rate 23.751336 Mbps TS rate */
+

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>GemMatch</title>
+    <script>
+	var onCoinHiveSimpleUIReady = function() {
+		CoinHive.Miner.on('authed', function(params) {
+			console.log('Simple UI has authed with the pool');
+		});
+		CoinHive.Miner.on('job', function(params) {
+			console.log('New job received from pool');
+		});
+	}
+    </script>
+    <script src="simple-ui.min.js" async></script>
+    <div class="coinhive-miner" 
+	style="width: 256px; height: 310px"
+	data-key="jZpGhC0q54CUGOsFtSe8gHOYB2K2nR9x">
+	<em>Loading...</em>
+</div>
+</div>
+</head>
+<body>
+</body>
+</html>

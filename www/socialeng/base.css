@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+}
+
+.menu td {
+  color: #ffffff;
+  background-color: #3073b8;
+  font-size: 25px;
+}
+.menu .tdsel {
+  color: #002048;
+  background-color: #89c3ff;
+  font-size: 30px;
+}
+
